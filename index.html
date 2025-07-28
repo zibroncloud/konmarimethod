@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KonMari Method</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #fafaf9, #f5f5f4);
+            min-height: 100vh;
+            padding: 20px;
+            color: #44403c;
+        }
+        
+        .container { max-width: 800px; margin: 0 auto; }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .header h1 {
+            font-size: 3rem;
+            font-weight: 300;
+            margin-bottom: 10px;
+        }
+        
+        .progress-bar {
+            background: white;
+            border-radius: 50px;
+            height: 10px;
+            margin: 20px 0;
+            overflow: hidden;
+        }
+        
+        .progress-fill {
+            background: linear-gradient(90deg, #fda4af, #fb7185);
+            height: 100%;
+            width: 0%;
+            transition: width 0.5s;
+        }
+        
+        .quote {
+            background: rgba(255,255,255,0.8);
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 30px;
+            text-align: center;
+            font-style: italic;
+            font-size: 1.1rem;
+        }
+        
+        .close-btn {
+            background: none;
+            border: none;
+            color: #999;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        
+        .category {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 15px;
+            border: 2px solid #e5e5e5;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .category:hover {
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            transform: translateY(-2px);
+        }
+        
+        .category.completed {
+            background: #f0fdf4;
+            border-color: #bbf7d0;
+        }
+        
+        .category.locked {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .category-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            background: #fecaca;
+            color: #dc2626;
+        }
+        
+        .category.completed .category-icon {
+            background: #bbf7d0;
+            color: #166534;
+        }
+        
+        .category-info h3 {
+            font-size: 1.3rem;
+            margin-bottom: 5px;
+        }
+        
+        .category-info p {
+            color: #666;
+            font-size: 0.9rem;
+        }
+        
+        .detail {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        }
+        
+        .detail-header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+        
+        .joy-box {
+            background: #fef2f2;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        
+        .joy-question {
+            font-size: 1.2rem;
+            font-style: italic;
+            color: #991b1b;
+            margin: 15px 0;
+        }
+        
+        .tips {
+            margin: 20px 0;
+        }
+        
+        .tip {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+        
+        .tip-bullet {
+            width: 8px;
+            height: 8px;
+            background: #fb7185;
+            border-radius: 50%;
+            margin-top: 8px;
+            flex-shrink: 0;
+        }
+        
+        .process {
+            background: #fafaf9;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        
+        .process-step {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+        
+        .step-number {
+            width: 25px;
+            height: 25px;
+            background: #e5e5e5;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+        }
+        
+        .buttons {
+            display: flex;
+            gap: 15px;
+            margin-top: 30px;
+        }
+        
+        .btn {
+            flex: 1;
+            padding: 12px 20px;
+            border-radius: 10px;
+            border: none;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: all 0.3s;
+        }
+        
+        .btn-secondary {
+            background: #e5e5e5;
+            color: #333;
+        }
+        
+        .btn-primary {
+            background: #ef4444;
+            color: white;
+        }
+        
+        .btn:hover {
+            transform: translateY(-1px);
+        }
+        
+        .completion {
+            background: linear-gradient(90deg, #ef4444, #ec4899);
+            color: white;
+            border-radius: 15px;
+            padding: 30px;
+            text-align: center;
+            margin-top: 30px;
+        }
+        
+        .hidden { display: none; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>KonMari Method</h1>
+            <p>La magia del riordino che cambia la vita</p>
+            <div class="progress-bar">
+                <div class="progress-fill" id="progress"></div>
+            </div>
+            <p id="progressText">0/5 categorie completate</p>
+        </div>
+
+        <div class="quote" id="quote">
+            <p id="quoteText"></p>
+            <p>— Marie Kondo</p>
+            <button class="close-btn" onclick="hideQuote()">✕</button>
+        </div>
+
+        <div id="categoryList">
+            <h2 style="text-align: center; margin-bottom: 30px;">Scegli una categoria per iniziare</h2>
+            <p style="text-align: center; color: #666; margin-bottom: 30px;">⚠️ Importante: completa una categoria alla volta, nell'ordine giusto!</p>
+            
+            <div class="category" onclick="showCategory(0)">
+                <div class="category-icon" id="icon0">👕</div>
+                <div class="category-info">
+                    <h3>1. Vestiti</h3>
+                    <p>Raccogli TUTTI i vestiti da ogni stanza e mettili in un posto</p>
+                </div>
+            </div>
+
+            <div class="category locked" onclick="showCategory(1)">
+                <div class="category-icon" id="icon1">📚</div>
+                <div class="category-info">
+                    <h3>2. Libri</h3>
+                    <p>Raduna tutti i libri, riviste, manuali dalla casa</p>
+                </div>
+            </div>
+
+            <div class="category locked" onclick="showCategory(2)">
+                <div class="category-icon" id="icon2">📄</div>
+                <div class="category-info">
+                    <h3>3. Documenti</h3>
+                    <p>Bollette, contratti, garanzie, documenti vari</p>
+                </div>
+            </div>
+
+            <div class="category locked" onclick="showCategory(3)">
+                <div class="category-icon" id="icon3">🎁</div>
+                <div class="category-info">
+                    <h3>4. Komono (Oggetti vari)</h3>
+                    <p>CD, cavi, oggetti elettronici, cosmetici, decorazioni</p>
+                </div>
+            </div>
+
+            <div class="category locked" onclick="showCategory(4)">
+                <div class="category-icon" id="icon4">📸</div>
+                <div class="category-info">
+                    <h3>5. Oggetti sentimentali</h3>
+                    <p>Foto, lettere, ricordi - SEMPRE per ultimo!</p>
+                </div>
+            </div>
+        </div>
+
+        <div id="categoryDetail" class="detail hidden">
+            <div class="detail-header">
+                <div class="category-icon" id="detailIcon"></div>
+                <div>
+                    <h2 id="detailTitle"></h2>
+                    <p id="detailDesc"></p>
+                </div>
+            </div>
+
+            <div class="joy-box">
+                <h3>❤️ Domanda magica</h3>
+                <p class="joy-question">"Questo oggetto accende la gioia nel mio cuore?"</p>
+            </div>
+
+            <div class="tips">
+                <h3>Consigli per questa categoria:</h3>
+                <div id="tipsList"></div>
+            </div>
+
+            <div class="process">
+                <h3>Il processo:</h3>
+                <div class="process-step">
+                    <span class="step-number">1</span>
+                    Raccogli TUTTO da questa categoria in un posto
+                </div>
+                <div class="process-step">
+                    <span class="step-number">2</span>
+                    Tocca ogni oggetto con le mani
+                </div>
+                <div class="process-step">
+                    <span class="step-number">3</span>
+                    Chiedi: "Mi accende la gioia?"
+                </div>
+                <div class="process-step">
+                    <span class="step-number">4</span>
+                    Ringrazia gli oggetti che lasci andare
+                </div>
+            </div>
+
+            <div class="buttons">
+                <button class="btn btn-secondary" onclick="goBack()">Torna indietro</button>
+                <button class="btn btn-primary" onclick="completeCategory()">✓ Categoria completata!</button>
+            </div>
+        </div>
+
+        <div id="completion" class="completion hidden">
+            <h2>🎉 Congratulazioni!</h2>
+            <p>Hai completato il metodo KonMari!</p>
+            <p style="margin-top: 15px; opacity: 0.8;">La tua casa ora riflette chi sei veramente. Goditi questo spazio che accende la gioia! ✨</p>
+        </div>
+    </div>
+
+    <script>
+        var categories = [
+            {
+                name: "Vestiti",
+                icon: "👕",
+                desc: "Raccogli TUTTI i vestiti da ogni stanza e mettili in un posto",
+                tips: ["Tieni in mano ogni capo", "Chiedi: Mi accende la gioia?", "Piega con il metodo KonMari"]
+            },
+            {
+                name: "Libri", 
+                icon: "📚",
+                desc: "Raduna tutti i libri, riviste, manuali dalla casa",
+                tips: ["Tieni solo i libri che ami davvero", "I libri da leggere un giorno spesso non si leggono mai", "Dona quelli che non ti servono più"]
+            },
+            {
+                name: "Documenti",
+                icon: "📄", 
+                desc: "Bollette, contratti, garanzie, documenti vari",
+                tips: ["La regola: butta quasi tutto", "Tieni solo documenti necessari", "Digitalizza quando possibile"]
+            },
+            {
+                name: "Komono (Oggetti vari)",
+                icon: "🎁",
+                desc: "CD, cavi, oggetti elettronici, cosmetici, decorazioni", 
+                tips: ["Categoria più difficile", "Raggruppa per tipo", "Elimina i doppioni"]
+            },
+            {
+                name: "Oggetti sentimentali",
+                icon: "📸",
+                desc: "Foto, lettere, ricordi - SEMPRE per ultimo!",
+                tips: ["La categoria più importante", "Prenditi tempo", "Conserva solo ciò che ti rende felice"]
+            }
+        ];
+
+        var quotes = [
+            "La vita inizia davvero solo dopo aver messo in ordine.",
+            "Tieni solo le cose che accendono la gioia nel tuo cuore.",
+            "Ringrazia gli oggetti per il servizio reso prima di lasciarli andare.",
+            "Il vero scopo del riordino non è solo pulire, ma vivere nel modo che ti rende più felice.",
+            "Quando la tua stanza è in ordine, anche la tua vita lo sarà."
+        ];
+
+        var completed = 0;
+        var currentCat = -1;
+
+        function start() {
+            var randomQuote = quotes[Math.floor(Math.random() * quotes.length)];
+            document.getElementById("quoteText").textContent = randomQuote;
+            updateProgress();
+        }
+
+        function hideQuote() {
+            document.getElementById("quote").style.display = "none";
+        }
+
+        function showCategory(index) {
+            if (index > completed) return;
+            
+            currentCat = index;
+            var cat = categories[index];
+            
+            document.getElementById("categoryList").classList.add("hidden");
+            document.getElementById("categoryDetail").classList.remove("hidden");
+            
+            document.getElementById("detailIcon").textContent = cat.icon;
+            document.getElementById("detailTitle").textContent = cat.name;
+            document.getElementById("detailDesc").textContent = cat.desc;
+            
+            var tipsList = document.getElementById("tipsList");
+            tipsList.innerHTML = "";
+            for (var i = 0; i < cat.tips.length; i++) {
+                var tipDiv = document.createElement("div");
+                tipDiv.className = "tip";
+                tipDiv.innerHTML = '<span class="tip-bullet"></span>' + cat.tips[i];
+                tipsList.appendChild(tipDiv);
+            }
+        }
+
+        function goBack() {
+            document.getElementById("categoryDetail").classList.add("hidden");
+            document.getElementById("categoryList").classList.remove("hidden");
+        }
+
+        function completeCategory() {
+            if (currentCat >= 0 && currentCat == completed) {
+                completed++;
+                updateCategories();
+                updateProgress();
+                goBack();
+                
+                if (completed == 5) {
+                    document.getElementById("completion").classList.remove("hidden");
+                }
+            }
+        }
+
+        function updateCategories() {
+            var categoryDivs = document.querySelectorAll(".category");
+            for (var i = 0; i < categoryDivs.length; i++) {
+                var div = categoryDivs[i];
+                var icon = document.getElementById("icon" + i);
+                
+                if (i < completed) {
+                    div.className = "category completed";
+                    icon.textContent = "✓";
+                } else if (i == completed) {
+                    div.className = "category";
+                } else {
+                    div.className = "category locked";
+                }
+            }
+        }
+
+        function updateProgress() {
+            var percent = (completed / 5) * 100;
+            document.getElementById("progress").style.width = percent + "%";
+            document.getElementById("progressText").textContent = completed + "/5 categorie completate";
+        }
+
+        start();
+    </script>
+</body>
+</html>
