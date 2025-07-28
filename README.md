@@ -1,0 +1,2 @@
+# konmarimethod
+metodo konmari
