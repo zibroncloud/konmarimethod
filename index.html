@@ -25,6 +25,12 @@
         .header h1 {
             font-size: 3rem;
             font-weight: 300;
+            margin-bottom: 5px;
+        }
+        
+        .version {
+            font-size: 0.9rem;
+            color: #999;
             margin-bottom: 10px;
         }
         
@@ -59,6 +65,30 @@
             color: #999;
             cursor: pointer;
             margin-top: 10px;
+        }
+        
+        .mode-toggle {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 30px;
+            text-align: center;
+            border: 2px solid #e5e5e5;
+        }
+        
+        .toggle-btn {
+            background: #f0f0f0;
+            border: none;
+            padding: 8px 15px;
+            margin: 0 5px;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .toggle-btn.active {
+            background: #ef4444;
+            color: white;
         }
         
         .category {
@@ -145,6 +175,55 @@
             margin: 15px 0;
         }
         
+        .photo-section {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 15px;
+            margin: 15px 0;
+            text-align: center;
+        }
+        
+        .photo-upload {
+            display: inline-block;
+            background: #e9ecef;
+            border: 2px dashed #adb5bd;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+            min-width: 150px;
+        }
+        
+        .photo-upload:hover {
+            background: #dee2e6;
+            border-color: #6c757d;
+        }
+        
+        .photo-preview {
+            max-width: 200px;
+            max-height: 200px;
+            border-radius: 8px;
+            margin: 10px;
+        }
+        
+        .screenshot-prompt {
+            background: linear-gradient(135deg, #ffd700, #ffed4e);
+            color: #7c2d12;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 20px 0;
+            text-align: center;
+            font-weight: bold;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.02); }
+            100% { transform: scale(1); }
+        }
+        
         .tips {
             margin: 20px 0;
         }
@@ -220,13 +299,51 @@
             transform: translateY(-1px);
         }
         
-        .completion {
-            background: linear-gradient(90deg, #ef4444, #ec4899);
+        .reward-section {
+            position: relative;
+            margin: 20px 0;
+        }
+        
+        .reward-quote {
+            background: linear-gradient(135deg, #10b981, #059669);
             color: white;
             border-radius: 15px;
-            padding: 30px;
+            padding: 25px;
             text-align: center;
-            margin-top: 30px;
+            font-style: italic;
+            font-size: 1.1rem;
+        }
+        
+        .big-complete-button {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+            color: white;
+            border: none;
+            border-radius: 15px;
+            cursor: pointer;
+            font-size: 1.5rem;
+            font-weight: bold;
+            transition: all 0.5s ease;
+            z-index: 10;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+        }
+        
+        .big-complete-button:hover {
+            transform: scale(1.02);
+            box-shadow: 0 10px 30px rgba(239, 68, 68, 0.4);
+        }
+        
+        .big-complete-button.dissolve {
+            opacity: 0;
+            transform: scale(0.8);
+            pointer-events: none;
         }
         
         .hidden { display: none; }
@@ -236,7 +353,9 @@
     <div class="container">
         <div class="header">
             <h1>KonMari Method</h1>
+            <p class="version">by Dino Bronzi, ver. 3.1</p>
             <p>La magia del riordino che cambia la vita</p>
+            
             <div class="progress-bar">
                 <div class="progress-fill" id="progress"></div>
             </div>
@@ -249,11 +368,20 @@
             <button class="close-btn" onclick="hideQuote()">✕</button>
         </div>
 
+        <div class="mode-toggle">
+            <h3>Modalità di riordino:</h3>
+            <button class="toggle-btn active" id="rigidBtn" onclick="setMode('rigid')">🎯 Rigida (KonMari)</button>
+            <button class="toggle-btn" id="freeBtn" onclick="setMode('free')">🆓 Libera</button>
+            <p style="margin-top: 10px; font-size: 0.9rem; color: #666;">
+                <span id="modeDesc">Segui l'ordine originale di Marie Kondo</span>
+            </p>
+        </div>
+
         <div id="categoryList">
             <h2 style="text-align: center; margin-bottom: 30px;">Scegli una categoria per iniziare</h2>
-            <p style="text-align: center; color: #666; margin-bottom: 30px;">⚠️ Importante: completa una categoria alla volta, nell'ordine giusto!</p>
+            <p id="warningText" style="text-align: center; color: #666; margin-bottom: 30px;"></p>
             
-            <div class="category" onclick="showCategory(0)">
+            <div class="category" onclick="showCategory(0)" id="cat0">
                 <div class="category-icon" id="icon0">👕</div>
                 <div class="category-info">
                     <h3>1. Vestiti</h3>
@@ -261,7 +389,7 @@
                 </div>
             </div>
 
-            <div class="category locked" onclick="showCategory(1)">
+            <div class="category" onclick="showCategory(1)" id="cat1">
                 <div class="category-icon" id="icon1">📚</div>
                 <div class="category-info">
                     <h3>2. Libri</h3>
@@ -269,7 +397,7 @@
                 </div>
             </div>
 
-            <div class="category locked" onclick="showCategory(2)">
+            <div class="category" onclick="showCategory(2)" id="cat2">
                 <div class="category-icon" id="icon2">📄</div>
                 <div class="category-info">
                     <h3>3. Documenti</h3>
@@ -277,7 +405,7 @@
                 </div>
             </div>
 
-            <div class="category locked" onclick="showCategory(3)">
+            <div class="category" onclick="showCategory(3)" id="cat3">
                 <div class="category-icon" id="icon3">🎁</div>
                 <div class="category-info">
                     <h3>4. Komono (Oggetti vari)</h3>
@@ -285,7 +413,7 @@
                 </div>
             </div>
 
-            <div class="category locked" onclick="showCategory(4)">
+            <div class="category" onclick="showCategory(4)" id="cat4">
                 <div class="category-icon" id="icon4">📸</div>
                 <div class="category-info">
                     <h3>5. Oggetti sentimentali</h3>
@@ -296,16 +424,38 @@
 
         <div id="categoryDetail" class="detail hidden">
             <div class="detail-header">
-                <div class="category-icon" id="detailIcon"></div>
+                <div class="category-icon" id="detailIcon">📦</div>
                 <div>
                     <h2 id="detailTitle"></h2>
-                    <p id="detailDesc"></p>
+                    <p id="detailDescription"></p>
                 </div>
             </div>
 
             <div class="joy-box">
                 <h3>❤️ Domanda magica</h3>
                 <p class="joy-question">"Questo oggetto accende la gioia nel mio cuore?"</p>
+            </div>
+
+            <div class="photo-section">
+                <h3>📸 Foto opzionali</h3>
+                <p style="font-size: 0.9rem; color: #666; margin-bottom: 15px;">Documenta il tuo progresso!</p>
+                
+                <div>
+                    <div class="photo-upload" onclick="uploadPhoto('before')" id="beforeUpload">
+                        <p>📷 Foto PRIMA</p>
+                        <p style="font-size: 0.8rem; color: #666;">Clicca per aggiungere</p>
+                    </div>
+                    
+                    <div class="photo-upload" onclick="uploadPhoto('after')" id="afterUpload">
+                        <p>📷 Foto DOPO</p>
+                        <p style="font-size: 0.8rem; color: #666;">Clicca per aggiungere</p>
+                    </div>
+                </div>
+                
+                <div id="photoPreview"></div>
+                <div id="screenshotPrompt" class="screenshot-prompt hidden">
+                    📸 Fai uno screenshot per immortalare questo momento! 📸
+                </div>
             </div>
 
             <div class="tips">
@@ -337,12 +487,19 @@
                 <button class="btn btn-secondary" onclick="goBack()">Torna indietro</button>
                 <button class="btn btn-primary" onclick="completeCategory()">✓ Categoria completata!</button>
             </div>
-        </div>
 
-        <div id="completion" class="completion hidden">
-            <h2>🎉 Congratulazioni!</h2>
-            <p>Hai completato il metodo KonMari!</p>
-            <p style="margin-top: 15px; opacity: 0.8;">La tua casa ora riflette chi sei veramente. Goditi questo spazio che accende la gioia! ✨</p>
+            <div class="reward-section hidden" id="rewardSection">
+                <div class="reward-quote">
+                    <p id="rewardText">Ottimo lavoro! ✨</p>
+                    <p style="margin-top: 10px; opacity: 0.9;">🎉 Ben fatto! 🎉</p>
+                </div>
+                <button class="big-complete-button" id="bigButton" onclick="dissolveButton()">
+                    <div>
+                        <p>🎉 HAI COMPLETATO LA CATEGORIA! 🎉</p>
+                        <p style="font-size: 1rem; margin-top: 10px; opacity: 0.9;">Clicca per vedere le congratulazioni!</p>
+                    </div>
+                </button>
+            </div>
         </div>
     </div>
 
@@ -385,84 +542,272 @@
             "Tieni solo le cose che accendono la gioia nel tuo cuore.",
             "Ringrazia gli oggetti per il servizio reso prima di lasciarli andare.",
             "Il vero scopo del riordino non è solo pulire, ma vivere nel modo che ti rende più felice.",
-            "Quando la tua stanza è in ordine, anche la tua vita lo sarà."
+            "Quando la tua stanza è in ordine, anche la tua vita lo sarà.",
+            "Il riordino è un dialogo con se stessi.", 
+            "Essere ordinati significa essere gentili con il futuro sé.",
+            "La tua casa dovrebbe essere un luogo che ti sostiene e ti ispira."
         ];
 
-        var completed = 0;
+        var rewardQuotes = [
+            "Fantastico! Hai liberato spazio! ✨",
+            "Ogni oggetto che lasci andare ti rende più libero! 🕊️",
+            "Bravissimo! Stai creando uno spazio che riflette chi sei! 🌟",
+            "Ottimo lavoro! Hai fatto un passo importante! 🌈",
+            "Meraviglioso! La tua casa sta diventando un santuario! 🏡",
+            "Complimenti! Hai allenato la tua capacità di scegliere! 💪"
+        ];
+
+        var completed = [];
         var currentCat = -1;
+        var mode = 'rigid';
 
         function start() {
+            loadProgress();
             var randomQuote = quotes[Math.floor(Math.random() * quotes.length)];
-            document.getElementById("quoteText").textContent = randomQuote;
+            var quoteText = document.getElementById("quoteText");
+            if (quoteText) quoteText.textContent = randomQuote;
             updateProgress();
+            updateCategories();
+            setMode(mode);
+        }
+
+        function setMode(newMode) {
+            mode = newMode;
+            var rigidBtn = document.getElementById("rigidBtn");
+            var freeBtn = document.getElementById("freeBtn");
+            var modeDesc = document.getElementById("modeDesc");
+            var warningText = document.getElementById("warningText");
+            
+            if (rigidBtn && freeBtn && modeDesc && warningText) {
+                if (mode === 'rigid') {
+                    rigidBtn.classList.add("active");
+                    freeBtn.classList.remove("active");
+                    modeDesc.textContent = "Segui l'ordine originale di Marie Kondo";
+                    warningText.textContent = "⚠️ Importante: completa una categoria alla volta, nell'ordine giusto!";
+                } else {
+                    freeBtn.classList.add("active");
+                    rigidBtn.classList.remove("active");
+                    modeDesc.textContent = "Scegli l'ordine che preferisci (sentimentali sempre per ultimo)";
+                    warningText.textContent = "💡 Puoi scegliere l'ordine, ma ricorda: gli oggetti sentimentali vanno sempre per ultimi!";
+                }
+            }
+            updateCategories();
+            saveProgress();
+        }
+
+        function loadProgress() {
+            var saved = localStorage.getItem('konmari-progress');
+            if (saved) {
+                var data = JSON.parse(saved);
+                completed = data.completed || [];
+                mode = data.mode || 'rigid';
+            }
+        }
+
+        function saveProgress() {
+            var data = { completed: completed, mode: mode };
+            localStorage.setItem('konmari-progress', JSON.stringify(data));
         }
 
         function hideQuote() {
-            document.getElementById("quote").style.display = "none";
+            var quote = document.getElementById("quote");
+            if (quote) quote.style.display = "none";
+        }
+
+        function updateCategories() {
+            for (var i = 0; i < 5; i++) {
+                var categoryDiv = document.getElementById("cat" + i);
+                var icon = document.getElementById("icon" + i);
+                
+                if (!categoryDiv || !icon) continue;
+                
+                var isCompleted = completed.includes(i);
+                var canClick = false;
+                
+                if (mode === 'rigid') {
+                    canClick = (i === completed.length);
+                } else {
+                    if (i === 4) {
+                        canClick = (completed.length >= 4 && !isCompleted);
+                    } else {
+                        canClick = !isCompleted;
+                    }
+                }
+                
+                if (isCompleted) {
+                    categoryDiv.className = "category completed";
+                    icon.textContent = "✓";
+                } else if (canClick) {
+                    categoryDiv.className = "category";
+                    icon.textContent = categories[i].icon;
+                } else {
+                    categoryDiv.className = "category locked";
+                    icon.textContent = categories[i].icon;
+                }
+            }
         }
 
         function showCategory(index) {
-            if (index > completed) return;
+            var canShow = false;
+            
+            if (mode === 'rigid') {
+                canShow = (index === completed.length);
+            } else {
+                if (index === 4) {
+                    canShow = (completed.length >= 4);
+                } else {
+                    canShow = !completed.includes(index);
+                }
+            }
+            
+            if (!canShow) return;
             
             currentCat = index;
             var cat = categories[index];
             
-            document.getElementById("categoryList").classList.add("hidden");
-            document.getElementById("categoryDetail").classList.remove("hidden");
+            var categoryList = document.getElementById("categoryList");
+            var categoryDetail = document.getElementById("categoryDetail");
             
-            document.getElementById("detailIcon").textContent = cat.icon;
-            document.getElementById("detailTitle").textContent = cat.name;
-            document.getElementById("detailDesc").textContent = cat.desc;
+            if (categoryList) categoryList.classList.add("hidden");
+            if (categoryDetail) categoryDetail.classList.remove("hidden");
+            
+            var detailIcon = document.getElementById("detailIcon");
+            var detailTitle = document.getElementById("detailTitle");
+            var detailDesc = document.getElementById("detailDescription");
+            
+            if (detailIcon) detailIcon.textContent = cat.icon;
+            if (detailTitle) detailTitle.textContent = cat.name;
+            if (detailDesc) detailDesc.textContent = cat.desc;
             
             var tipsList = document.getElementById("tipsList");
-            tipsList.innerHTML = "";
-            for (var i = 0; i < cat.tips.length; i++) {
-                var tipDiv = document.createElement("div");
-                tipDiv.className = "tip";
-                tipDiv.innerHTML = '<span class="tip-bullet"></span>' + cat.tips[i];
-                tipsList.appendChild(tipDiv);
+            if (tipsList) {
+                tipsList.innerHTML = "";
+                for (var i = 0; i < cat.tips.length; i++) {
+                    var tipDiv = document.createElement("div");
+                    tipDiv.className = "tip";
+                    tipDiv.innerHTML = '<span class="tip-bullet"></span>' + cat.tips[i];
+                    tipsList.appendChild(tipDiv);
+                }
             }
+            
+            var rewardSection = document.getElementById("rewardSection");
+            if (rewardSection) {
+                rewardSection.classList.add("hidden");
+            }
+            
+            var bigButton = document.getElementById("bigButton");
+            if (bigButton) bigButton.classList.remove("dissolve");
+            
+            loadPhotos(index);
         }
 
         function goBack() {
-            document.getElementById("categoryDetail").classList.add("hidden");
-            document.getElementById("categoryList").classList.remove("hidden");
+            currentCat = -1;
+            var categoryDetail = document.getElementById("categoryDetail");
+            var categoriesList = document.getElementById("categoryList");
+            
+            if (categoryDetail) categoryDetail.classList.add("hidden");
+            if (categoriesList) categoriesList.classList.remove("hidden");
         }
 
         function completeCategory() {
-            if (currentCat >= 0 && currentCat == completed) {
-                completed++;
-                updateCategories();
-                updateProgress();
-                goBack();
+            if (currentCat >= 0) {
+                var alreadyCompleted = completed.includes(currentCat);
+                if (alreadyCompleted) return;
                 
-                if (completed == 5) {
-                    document.getElementById("completion").classList.remove("hidden");
+                var randomReward = rewardQuotes[Math.floor(Math.random() * rewardQuotes.length)];
+                var rewardText = document.getElementById("rewardText");
+                if (rewardText) rewardText.textContent = randomReward;
+                
+                var rewardSection = document.getElementById("rewardSection");
+                if (rewardSection) {
+                    rewardSection.classList.remove("hidden");
                 }
             }
         }
 
-        function updateCategories() {
-            var categoryDivs = document.querySelectorAll(".category");
-            for (var i = 0; i < categoryDivs.length; i++) {
-                var div = categoryDivs[i];
-                var icon = document.getElementById("icon" + i);
+        function dissolveButton() {
+            if (currentCat >= 0) {
+                var alreadyCompleted = completed.includes(currentCat);
+                if (alreadyCompleted) return;
                 
-                if (i < completed) {
-                    div.className = "category completed";
-                    icon.textContent = "✓";
-                } else if (i == completed) {
-                    div.className = "category";
-                } else {
-                    div.className = "category locked";
+                completed.push(currentCat);
+                updateCategories();
+                updateProgress();
+                saveProgress();
+                
+                var bigButton = document.getElementById("bigButton");
+                if (bigButton) {
+                    bigButton.classList.add("dissolve");
                 }
+                
+                setTimeout(function() {
+                    goBack();
+                }, 10000);
             }
         }
 
         function updateProgress() {
-            var percent = (completed / 5) * 100;
-            document.getElementById("progress").style.width = percent + "%";
-            document.getElementById("progressText").textContent = completed + "/5 categorie completate";
+            var percent = (completed.length / 5) * 100;
+            var progressBar = document.getElementById("progress");
+            var progressText = document.getElementById("progressText");
+            
+            if (progressBar) progressBar.style.width = percent + "%";
+            if (progressText) progressText.textContent = completed.length + "/5 categorie completate";
+        }
+
+        function loadPhotos(categoryIndex) {
+            var beforeKey = 'photo-before-' + categoryIndex;
+            var afterKey = 'photo-after-' + categoryIndex;
+            var beforePhoto = localStorage.getItem(beforeKey);
+            var afterPhoto = localStorage.getItem(afterKey);
+            
+            var preview = document.getElementById("photoPreview");
+            if (!preview) return;
+            
+            preview.innerHTML = "";
+            
+            if (beforePhoto) {
+                var beforeDiv = document.createElement("div");
+                beforeDiv.innerHTML = '<p><strong>Prima:</strong></p><img src="' + beforePhoto + '" class="photo-preview">';
+                preview.appendChild(beforeDiv);
+            }
+            
+            if (afterPhoto) {
+                var afterDiv = document.createElement("div");
+                afterDiv.innerHTML = '<p><strong>Dopo:</strong></p><img src="' + afterPhoto + '" class="photo-preview">';
+                preview.appendChild(afterDiv);
+            }
+            
+            var screenshotPrompt = document.getElementById("screenshotPrompt");
+            if (screenshotPrompt) {
+                if (beforePhoto && afterPhoto) {
+                    screenshotPrompt.classList.remove("hidden");
+                } else {
+                    screenshotPrompt.classList.add("hidden");
+                }
+            }
+        }
+
+        function uploadPhoto(type) {
+            var input = document.createElement('input');
+            input.type = 'file';
+            input.accept = 'image/*';
+            
+            input.onchange = function(e) {
+                var file = e.target.files[0];
+                if (!file) return;
+                
+                var reader = new FileReader();
+                reader.onload = function(event) {
+                    var key = 'photo-' + type + '-' + currentCat;
+                    localStorage.setItem(key, event.target.result);
+                    loadPhotos(currentCat);
+                };
+                reader.readAsDataURL(file);
+            };
+            
+            input.click();
         }
 
         start();
